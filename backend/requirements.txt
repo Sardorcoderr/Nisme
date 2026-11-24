@@ -1,0 +1,29 @@
+# Nisme AI — full-stack (FastAPI backend + static frontend)
+# O'rnatish: pip install -r requirements.txt
+
+fastapi
+uvicorn[standard]
+python-multipart
+websockets
+python-dotenv
+requests
+numpy
+
+# Whisper (ASR)
+openai-whisper
+
+# ffmpeg PATH'da bo'lmasa ham ishlashi uchun (Windows'da WinError 2 yechimi)
+imageio-ffmpeg
+
+# TTS / tarjima
+elevenlabs>=1.0.0
+deep-translator
+
+# URL dan video yuklash (YouTube, TikTok va boshqalar)
+yt-dlp>=2025.1.0
+
+# Ixtiyoriy: Redis job store (REDIS_URL o'rnatilganda)
+redis>=5.0.0
+
+# Olib tashlandi: moviepy, ffmpeg-python, pydub (endi kerak emas;
+# pydub Python 3.13+/3.14'da `audioop` yo'qligi sababli ishlamaydi)

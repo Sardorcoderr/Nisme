@@ -1,0 +1,27 @@
+# Render Blueprint — https://render.com
+# Dashboard: New → Blueprint → shu reponi ulang
+
+services:
+  - type: web
+    name: nisme-ai
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: NISME_API_KEY
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: MAX_FILE_SIZE_MB
+        value: "80"
+      - key: RATE_LIMIT_REQUESTS
+        value: "5"
+    healthCheckPath: /api/health
+
+  # Ixtiyoriy Redis (Key Value)
+  # - type: redis
+  #   name: nisme-redis
+  #   plan: free
+  #   ipAllowList: []

@@ -1,0 +1,10 @@
+# Railway — https://railway.app
+# New Project → Deploy from GitHub → root = shu papka
+
+[build]
+dockerfilePath = "Dockerfile"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 30
+restartPolicyType = "on_failure"

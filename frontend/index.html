@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nisme AI — Translate Videos Across Languages</title>
+<style>
+  :root{
+    --bg-hero-1:#eaf5ff;
+    --bg-hero-2:#cfe9fb;
+    --blue-deep:#0b3f6b;
+    --blue-mid:#1785c9;
+    --blue-bright:#1fa1e8;
+    --blue-accent:#0ea5e9;
+    --ink:#0a2540;
+    --ink-soft:#4a6178;
+    --card:#ffffff;
+    --card-tint:#eef7fd;
+    --line:#d8e9f5;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,'Inter',Arial,sans-serif;
+    color:var(--ink);
+    background:#fff url('/assets/bg-dots.png') repeat;
+    background-size:840px auto;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{display:block;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;cursor:pointer;border:none;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 32px;}
+
+  /* Header */
+  header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(234,245,255,0.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;max-width:1180px;margin:0 auto;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px;}
+  .brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#ff8a3d,#ff5f6d);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:17px;}
+  .navlinks{display:flex;gap:34px;font-size:14.5px;font-weight:500;color:var(--ink);}
+  .navlinks a{opacity:.75;transition:opacity .15s;}
+  .navlinks a:hover{opacity:1;}
+  .navright{display:flex;align-items:center;gap:18px;font-size:14.5px;font-weight:500;}
+  .btn{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:11px 22px;border-radius:11px;font-weight:600;font-size:14.5px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn-primary{background:var(--ink);color:#fff;}
+  .btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(10,37,64,.25);}
+  .btn-ghost{background:transparent;border:1px solid #cfe0ee;color:var(--ink);}
+  .btn-ghost:hover{background:#fff;}
+  .btn-outline-white{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.5);color:#fff;}
+
+  /* Hero */
+  .hero{
+    background:linear-gradient(180deg,#eaf6ff 0%, #d7edfb 55%, #cfe9fb 100%);
+    padding:64px 0 40px;position:relative;overflow:hidden;
+  }
+  .hero-grid{
+    display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    background:#fff;border:1px solid var(--line);
+    padding:7px 16px;border-radius:999px;font-size:13px;font-weight:600;color:var(--blue-mid);
+    margin-bottom:22px;
+  }
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--blue-bright);}
+  h1{
+    font-size:52px;line-height:1.06;font-weight:800;letter-spacing:-1.3px;
+    margin-bottom:20px;
+  }
+  h1 .accent{color:var(--blue-bright);display:block;}
+  .hero p.lead{font-size:17px;color:var(--ink-soft);max-width:480px;line-height:1.6;margin-bottom:30px;}
+  .hero-ctas{display:flex;gap:14px;margin-bottom:44px;}
+  .stats{display:flex;gap:44px;}
+  .stat b{display:block;font-size:26px;font-weight:800;color:var(--ink);}
+  .stat span{font-size:13px;color:var(--ink-soft);}
+
+  .hero-visual{
+    position:relative;background:linear-gradient(160deg,#0a2f52,#05161f);
+    border-radius:22px;padding:14px;box-shadow:0 30px 60px -20px rgba(9,50,90,.35);
+  }
+  .hero-visual .frame{
+    position:relative;border-radius:14px;overflow:hidden;aspect-ratio:16/10.5;
+    background:radial-gradient(circle at 50% 45%, #123457 0%, #071522 70%);
+  }
+  .brainviz{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+  .badge-speed{
+    position:absolute;top:16px;right:16px;background:rgba(6,20,32,.7);
+    border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 14px;color:#fff;text-align:right;
+  }
+  .badge-speed b{display:block;font-size:20px;color:#7fe0ff;}
+  .badge-speed span{font-size:10.5px;opacity:.75;}
+  .lang-chips{position:absolute;bottom:14px;left:14px;display:flex;gap:8px;}
+  .lang-chip{
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+    color:#dff2ff;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px;letter-spacing:.5px;
+  }
+  .marquee-strip{
+    text-align:center;font-weight:900;font-size:110px;letter-spacing:2px;
+    color:rgba(255,255,255,.5);
+    -webkit-text-stroke:1px rgba(6,60,100,.12);
+    white-space:nowrap;overflow:hidden;user-select:none;
+    margin-top:8px;
+  }
+
+  /* Sections generic */
+  section{padding:96px 0;}
+  #features, #languages, #how{
+    background:transparent;
+  }
+  .section-head{text-align:center;max-width:620px;margin:0 auto 56px;}
+  .tag{
+    display:inline-flex;align-items:center;gap:6px;background:var(--card-tint);
+    color:var(--blue-mid);font-size:12.5px;font-weight:700;padding:7px 15px;border-radius:999px;margin-bottom:18px;
+  }
+  h2{font-size:37px;font-weight:800;letter-spacing:-1px;margin-bottom:14px;}
+  .section-head p{color:var(--ink-soft);font-size:16px;line-height:1.6;}
+
+  /* Features */
+  .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  .feature-card{
+    background:var(--card-tint);border:1px solid var(--line);border-radius:var(--radius);
+    padding:28px;transition:transform .18s ease, box-shadow .18s ease, border-color .18s;
+  }
+  .feature-card:hover{transform:translateY(-4px);box-shadow:0 16px 34px -18px rgba(10,60,100,.3);border-color:#b9dcf2;}
+  .ficon{
+    width:42px;height:42px;border-radius:11px;background:#fff;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;margin-bottom:16px;color:var(--blue-mid);
+  }
+  .feature-card h3{font-size:17px;margin-bottom:8px;font-weight:700;}
+  .feature-card p{font-size:14px;color:var(--ink-soft);line-height:1.55;}
+
+  /* Video/demo section */
+  .demo-section{background:linear-gradient(180deg,#dff1fc,#bfe3f7);}
+  .demo-shell{
+    background:#fff;border-radius:22px;padding:14px;box-shadow:0 30px 60px -30px rgba(10,60,100,.35);
+  }
+  .demo-player{
+    position:relative;border-radius:14px;overflow:hidden;aspect-ratio:16/9;
+    background:radial-gradient(circle at 45% 40%, #0f3a52 0%, #04121c 75%);
+  }
+  .demo-player canvas{position:absolute;inset:0;width:100%;height:100%;}
+  .play-btn{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:66px;height:66px;border-radius:50%;background:var(--blue-bright);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(0,0,0,.35);
+    transition:transform .15s;
+  }
+  .play-btn:hover{transform:translate(-50%,-50%) scale(1.06);}
+  .player-controls{
+    position:absolute;left:0;right:0;bottom:0;padding:12px 16px;
+    display:flex;align-items:center;gap:12px;color:#fff;font-size:12px;
+    background:linear-gradient(0deg,rgba(0,0,0,.55),transparent);
+  }
+  .progress-track{flex:1;height:4px;background:rgba(255,255,255,.3);border-radius:2px;overflow:hidden;}
+  .progress-fill{height:100%;width:32%;background:var(--blue-bright);}
+  .demo-meta{display:flex;justify-content:space-between;align-items:center;padding:14px 6px 4px;font-size:13px;color:var(--ink-soft);}
+  .demo-meta .live{display:inline-flex;align-items:center;gap:6px;}
+  .livedot{width:7px;height:7px;border-radius:50%;background:#25c37e;}
+  .demo-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px;}
+  .demo-stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;text-align:center;}
+  .demo-stat b{display:block;font-size:22px;color:var(--blue-mid);font-weight:800;}
+  .demo-stat span{font-size:13px;color:var(--ink-soft);}
+
+  /* Languages */
+  .langs-wrap{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-bottom:30px;}
+  .lang-pill{
+    display:flex;align-items:center;gap:10px;background:var(--card-tint);border:1px solid var(--line);
+    padding:14px 20px;border-radius:14px;font-weight:700;min-width:150px;
+  }
+  .lang-pill .code{
+    width:34px;height:34px;border-radius:8px;background:#fff;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--blue-mid);font-weight:800;
+  }
+  .lang-pill small{display:block;font-weight:500;color:var(--ink-soft);font-size:11px;}
+  .langs-footer{
+    text-align:center;background:var(--card-tint);border:1px solid var(--line);border-radius:14px;
+    padding:14px;max-width:520px;margin:0 auto;color:var(--ink-soft);font-size:13.5px;display:flex;gap:10px;align-items:center;justify-content:center;
+  }
+
+  /* How it works */
+  .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;position:relative;}
+  .step-card{
+    background:var(--card-tint);border:1px solid var(--line);border-radius:var(--radius);
+    padding:32px 26px;position:relative;
+  }
+  .step-num{font-size:44px;font-weight:900;color:#c3def0;margin-bottom:6px;}
+  .step-icon{
+    width:40px;height:40px;border-radius:10px;background:#fff;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--blue-mid);margin-bottom:16px;
+  }
+  .step-card h3{font-size:16.5px;margin-bottom:8px;}
+  .step-card p{font-size:13.5px;color:var(--ink-soft);line-height:1.55;}
+  .step-arrow{position:absolute;top:38px;right:-22px;color:#a9cfe6;font-size:20px;}
+
+  .cta-final{text-align:center;margin-top:48px;}
+
+  footer{background:#f5fafd;border-top:1px solid var(--line);padding:36px 0;}
+  .foot-row{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+  .foot-links{display:flex;gap:24px;font-size:13.5px;color:var(--ink-soft);}
+  .foot-social{display:flex;gap:12px;}
+  .foot-social span{
+    width:34px;height:34px;border-radius:9px;background:#fff;border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--ink-soft);
+  }
+  .foot-bottom{text-align:center;color:var(--ink-soft);font-size:12.5px;margin-top:22px;}
+
+  /* Modal / Get Started flow */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(6,20,32,.55);backdrop-filter:blur(3px);
+    display:none;align-items:center;justify-content:center;z-index:200;padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:#fff;border-radius:20px;max-width:520px;width:100%;
+    padding:30px 30px 26px;position:relative;box-shadow:0 40px 80px -20px rgba(0,0,0,.4);
+    max-height:88vh;overflow-y:auto;
+  }
+  .modal-close{
+    position:absolute;top:18px;right:18px;width:32px;height:32px;border-radius:9px;
+    background:var(--card-tint);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--ink-soft);
+  }
+  .modal h3{font-size:22px;font-weight:800;margin-bottom:6px;}
+  .modal p.sub{color:var(--ink-soft);font-size:13.5px;margin-bottom:22px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink);margin-bottom:7px;}
+  .field input[type=text],.field select{
+    width:100%;padding:12px 14px;border-radius:11px;border:1px solid var(--line);
+    background:var(--card-tint);font-size:14px;color:var(--ink);
+  }
+  .field input:focus,.field select:focus{outline:2px solid var(--blue-bright);outline-offset:1px;}
+  .row2{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end;}
+  .swap-btn{
+    width:40px;height:40px;border-radius:10px;background:var(--card-tint);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:var(--blue-mid);margin-bottom:1px;
+  }
+  .modal .btn-primary{width:100%;justify-content:center;padding:13px;font-size:15px;margin-top:6px;background:var(--blue-bright);}
+  .modal .btn-primary:disabled{opacity:.6;cursor:default;transform:none;box-shadow:none;}
+
+  .process-list{margin:18px 0;display:flex;flex-direction:column;gap:12px;}
+  .process-item{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--ink-soft);}
+  .process-item .pdot{
+    width:20px;height:20px;border-radius:50%;border:2px solid var(--line);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;
+  }
+  .process-item.active .pdot{border-color:var(--blue-bright);background:var(--blue-bright);}
+  .process-item.done .pdot{border-color:#25c37e;background:#25c37e;}
+  .process-item.active{color:var(--ink);font-weight:600;}
+  .process-item.done{color:var(--ink);}
+  .modal-progress-track{height:7px;background:var(--card-tint);border-radius:4px;overflow:hidden;margin:16px 0 4px;}
+  .modal-progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--blue-bright),#25c37e);transition:width .4s ease;}
+  .progress-pct{font-size:12px;color:var(--ink-soft);text-align:right;}
+
+  .result-card{
+    background:var(--card-tint);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:6px;
+    display:flex;align-items:center;gap:14px;
+  }
+  .result-thumb{
+    width:64px;height:64px;border-radius:10px;flex-shrink:0;
+    background:linear-gradient(135deg,#0a2f52,#05161f);
+    display:flex;align-items:center;justify-content:center;color:#7fe0ff;font-size:20px;
+  }
+  .result-card b{display:block;font-size:14px;}
+  .result-card span{font-size:12.5px;color:var(--ink-soft);}
+  .download-btn{
+    margin-left:auto;background:var(--ink);color:#fff;padding:9px 15px;border-radius:9px;font-size:13px;font-weight:600;
+  }
+
+  @media (max-width:900px){
+    .hero-grid{grid-template-columns:1fr;}
+    .navlinks{display:none;}
+    h1{font-size:38px;}
+    .features-grid,.steps-grid,.demo-stats{grid-template-columns:1fr;}
+    .step-arrow{display:none;}
+    .marquee-strip{font-size:60px;}
+    .row2{grid-template-columns:1fr;}
+    .swap-btn{display:none;}
+  }
+
+  /* ═══ Dark hero (bg-hero.jpg). Bu blokni o'chirsangiz — avvalgi och dizayn qaytadi ═══ */
+  header{background:rgba(7,14,29,.96);border-bottom:1px solid rgba(255,255,255,.08);}
+  header .brand{color:#fff;}
+  header .navlinks,header .navright a{color:#e6f0ff;}
+  header .btn-primary,.hero .btn-primary{background:#fff;color:var(--ink);}
+  .hero{
+    background:
+      linear-gradient(180deg,rgba(5,10,22,.20) 0%,rgba(5,10,22,.55) 100%),
+      url('assets/bg-hero.jpg') center top / cover no-repeat,
+      #060d1c;
+    color:#fff;
+  }
+  .hero h1{color:#fff;}
+  .hero h1 .accent{color:#5cc8ff;}
+  .hero p.lead{color:rgba(255,255,255,.78);}
+  .hero .eyebrow{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#a9e0ff;}
+  .hero .btn-ghost{border-color:rgba(255,255,255,.35);color:#fff;}
+  .hero .btn-ghost:hover{background:rgba(255,255,255,.1);}
+  .hero .stat b{color:#fff;}
+  .hero .stat span{color:rgba(255,255,255,.65);}
+  .hero-visual{border:1px solid rgba(255,255,255,.1);box-shadow:0 30px 80px -20px rgba(31,161,232,.35);}
+  .marquee-strip{color:rgba(255,255,255,.05);-webkit-text-stroke:1px rgba(255,255,255,.14);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav">
+    <div class="brand"><span class="logo">N</span> Nisme AI</div>
+    <nav class="navlinks">
+      <a href="#home">Home</a>
+      <a href="#features">Features</a>
+      <a href="#languages">Languages</a>
+      <a href="#how">How It Works</a>
+    </nav>
+    <div class="navright">
+      <a href="#" id="signInLink">Sign In</a>
+      <button class="btn btn-primary" id="tryFreeBtn">Try Free</button>
+    </div>
+  </div>
+</header>
+
+<section class="hero" id="home">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow"><span class="dot"></span> AI-Powered Video Translation</div>
+        <h1>Translate Videos<span class="accent">Across Languages</span></h1>
+        <p class="lead">Nisme AI translates YouTube and TikTok videos into 7+ languages including Uzbek, English, Turkish, Russian, Chinese, Japanese, and Korean.</p>
+        <div class="hero-ctas">
+          <button class="btn btn-primary" id="getStartedBtn">Get Started <span>&rarr;</span></button>
+          <button class="btn btn-ghost" id="watchDemoBtn">&#9654; Watch Demo</button>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>7+</b><span>Languages</span></div>
+          <div class="stat"><b>95%</b><span>Accuracy</span></div>
+          <div class="stat"><b>2M+</b><span>Videos Translated</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="frame">
+          <div class="brainviz"><canvas id="heroBrain" width="520" height="340" style="width:100%;height:100%;"></canvas></div>
+          <div class="badge-speed"><b>99%</b><span>Translation Speed</span></div>
+          <div class="lang-chips">
+            <span class="lang-chip">UZ</span><span class="lang-chip">GB</span><span class="lang-chip">TR</span><span class="lang-chip">RU</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="marquee-strip">NISME GROUP &nbsp;&middot;&nbsp; NISME AI &nbsp;&middot;&nbsp; NISME GROUP &nbsp;&middot;&nbsp; NISME AI</div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="tag">&#10022; Powerful Features</span>
+      <h2>Why Choose Nisme AI?</h2>
+      <p>Experience the next generation of video translation powered by cutting-edge AI technology.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="ficon">&#127760;</div>
+        <h3>Multi-Platform Support</h3>
+        <p>Seamlessly translate videos from YouTube and TikTok with just a link.</p>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">&#127760;&#65039;</div>
+        <h3>7+ Languages</h3>
+        <p>Support for Uzbek, English, Turkish, Russian, Chinese, Japanese, and Korean.</p>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">&#9889;</div>
+        <h3>Lightning Fast</h3>
+        <p>Get your translations in minutes, not hours. AI-powered processing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">&#127908;</div>
+        <h3>Voice Cloning</h3>
+        <p>Maintain the original speaker's voice while translating to new languages.</p>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">&#10024;</div>
+        <h3>Natural Output</h3>
+        <p>AI ensures translations sound natural with proper context and tone.</p>
+      </div>
+      <div class="feature-card">
+        <div class="ficon">&#128737;&#65039;</div>
+        <h3>Secure & Private</h3>
+        <p>Your content is processed securely and never stored without permission.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section" id="demo">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="tag">&#9654; See It In Action</span>
+      <h2>Watch the Magic Happen</h2>
+      <p>See how Nisme AI transforms videos across languages in real-time with our advanced neural translation technology.</p>
+    </div>
+    <div class="demo-shell">
+      <div class="demo-player" id="demoPlayer">
+        <canvas id="demoCanvas"></canvas>
+        <div class="play-btn" id="playBtn">&#9654;&#65039;</div>
+        <div class="player-controls">
+          <span>&#9654;&#65039;</span>
+          <div class="progress-track"><div class="progress-fill" id="playerFill"></div></div>
+          <span>&#128266;</span><span>&#9974;</span>
+        </div>
+      </div>
+      <div class="demo-meta">
+        <span>GB &rarr; UZ &nbsp; English to Uzbek Translation</span>
+        <span class="live"><span class="livedot"></span> AI-Powered Voice Sync</span>
+      </div>
+    </div>
+    <div class="demo-stats">
+      <div class="demo-stat"><b>&lt; 2 min</b><span>Real-time Processing</span></div>
+      <div class="demo-stat"><b>99% Match</b><span>Voice Preservation</span></div>
+      <div class="demo-stat"><b>95%+</b><span>Lip Sync Accuracy</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="languages">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Supported Languages</h2>
+      <p>Translate your videos between any of these languages with high accuracy and natural-sounding results.</p>
+    </div>
+    <div class="langs-wrap">
+      <div class="lang-pill"><span class="code">UZ</span><div>Uzbek<small>UZ</small></div></div>
+      <div class="lang-pill"><span class="code">GB</span><div>English<small>EN</small></div></div>
+      <div class="lang-pill"><span class="code">TR</span><div>Turkish<small>TR</small></div></div>
+      <div class="lang-pill"><span class="code">RU</span><div>Russian<small>RU</small></div></div>
+      <div class="lang-pill"><span class="code">CN</span><div>Chinese<small>ZH</small></div></div>
+      <div class="lang-pill"><span class="code">JP</span><div>Japanese<small>JA</small></div></div>
+      <div class="lang-pill"><span class="code">KR</span><div>Korean<small>KO</small></div></div>
+    </div>
+    <div class="langs-footer">UZ &middot; GB &middot; TR &middot; RU &nbsp; Translate between all languages instantly</div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>How It Works</h2>
+      <p>Three simple steps to translate any video into your preferred language.</p>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-icon">&#128279;</div>
+        <h3>Paste Video Link</h3>
+        <p>Simply paste any YouTube or TikTok video URL into our platform.</p>
+        <div class="step-arrow">&rarr;</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-icon">&#10024;</div>
+        <h3>Select Languages</h3>
+        <p>Choose the source language and your target translation language.</p>
+        <div class="step-arrow">&rarr;</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-icon">&#11015;&#65039;</div>
+        <h3>Get Translated Video</h3>
+        <p>Download your perfectly translated video with synced audio in minutes.</p>
+      </div>
+    </div>
+    <div class="cta-final">
+      <button class="btn btn-primary" id="startTranslatingBtn">Start Translating Now</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-row">
+      <div class="brand"><span class="logo">N</span> Nisme AI</div>
+      <div class="foot-links"><a href="#">Privacy</a><a href="#">Terms</a><a href="#">Contact</a></div>
+      <div class="foot-social"><span>&#128038;</span><span>&#9654;</span><span>&#128172;</span></div>
+    </div>
+    <div class="foot-bottom">&copy; 2026 Nisme AI. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- Get Started / Translate modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modalContent">
+    <button class="modal-close" id="modalCloseBtn">&#10005;</button>
+
+    <!-- Step 1: form -->
+    <div id="formStep">
+      <h3>Translate a video</h3>
+      <p class="sub">Upload a video, pick languages, model & voice — Nisme AI does the rest.</p>
+      <div class="field">
+        <label>Upload your video</label>
+        <input type="file" id="videoFileInput" accept="video/*" style="width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;">
+        <div id="fileNameHint" style="font-size:12.5px;color:var(--ink-soft);margin-top:6px;"></div>
+      </div>
+      <div style="text-align:center;color:var(--ink-soft);font-size:12px;margin:6px 0 2px;">— yoki —</div>
+      <div class="field">
+        <label>YouTube / TikTok URL</label>
+        <input type="url" id="videoUrlInput" placeholder="https://youtube.com/watch?v=... yoki TikTok link" style="width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:10px;font-size:14px;">
+      </div>
+      <div class="row2">
+        <div class="field" style="margin-bottom:0;">
+          <label>From</label>
+          <select id="fromLang">
+            <option>Auto-detect</option><option>English</option><option>Uzbek</option><option>Turkish</option><option>Russian</option><option>Chinese</option><option>Japanese</option><option>Korean</option>
+          </select>
+        </div>
+        <div class="swap-btn" id="swapBtn">&#8646;</div>
+        <div class="field" style="margin-bottom:0;">
+          <label>To</label>
+          <select id="toLang">
+            <option>Uzbek</option><option>English</option><option>Turkish</option><option>Russian</option><option>Chinese</option><option>Japanese</option><option>Korean</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-top:14px;display:flex;align-items:center;gap:8px;">
+        <input type="checkbox" id="burnSubtitlesCheckbox" style="width:16px;height:16px;">
+        <label for="burnSubtitlesCheckbox" style="margin:0;font-size:13.5px;color:var(--ink-soft);">Burn in translated subtitles</label>
+      </div>
+
+      <div class="row2" style="margin-top:14px;">
+        <div class="field" style="margin-bottom:0;">
+          <label>Whisper model</label>
+          <select id="modelSizeSelect">
+            <option value="tiny">Tiny — eng tez</option>
+            <option value="base" selected>Base — tavsiya</option>
+            <option value="small">Small — aniqroq</option>
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Voice</label>
+          <select id="voiceSelect">
+            <option value="" selected>Auto</option>
+          </select>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" id="startTranslateBtn" style="margin-top:20px;">Translate Video &rarr;</button>
+    </div>
+
+    <!-- Step 2: processing -->
+    <div id="processStep" style="display:none;">
+      <h3>Translating your video</h3>
+      <p class="sub" id="processSub">english &rarr; uzbek &middot; hang tight, this takes a moment</p>
+      <div class="process-list" id="processList">
+        <div class="process-item" data-step="0"><span class="pdot"></span> Fetching video & extracting audio</div>
+        <div class="process-item" data-step="1"><span class="pdot"></span> Transcribing speech (Whisper AI)</div>
+        <div class="process-item" data-step="2"><span class="pdot"></span> Translating text</div>
+        <div class="process-item" data-step="3"><span class="pdot"></span> Cloning voice & generating speech</div>
+        <div class="process-item" data-step="4"><span class="pdot"></span> Syncing audio to video</div>
+      </div>
+      <div class="modal-progress-track"><div class="modal-progress-fill" id="modalFill"></div></div>
+      <div class="progress-pct" id="progressPct">0%</div>
+    </div>
+
+    <!-- Step 3: result -->
+    <div id="resultStep" style="display:none;">
+      <h3>Your video is ready! &#127881;</h3>
+      <p class="sub">Translated and voice-synced in under 2 minutes.</p>
+      <div class="result-card">
+        <div class="result-thumb">&#127916;</div>
+        <div>
+          <b id="resultTitle">translated_video_uz.mp4</b>
+          <span id="resultSub">03:42 &middot; 95% lip-sync match</span>
+        </div>
+        <button class="download-btn" id="downloadBtn">Download</button>
+      </div>
+      <button class="btn btn-ghost" id="translateAnotherBtn" style="width:100%;justify-content:center;margin-top:16px;">Translate another video</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---- Hero brain canvas animation ----
+(function(){
+  const canvas = document.getElementById('heroBrain');
+  const ctx = canvas.getContext('2d');
+  let w = canvas.width, h = canvas.height;
+  const nodes = [];
+  for(let i=0;i<40;i++){
+    nodes.push({
+      x: w/2 + (Math.random()-0.5)*260,
+      y: h/2 + (Math.random()-0.5)*180,
+      r: Math.random()*2+1,
+      vx:(Math.random()-0.5)*0.4,
+      vy:(Math.random()-0.5)*0.4,
+      hue: Math.random()>0.5? '124,224,255':'255,140,90'
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    // glow core
+    const grad = ctx.createRadialGradient(w/2,h/2,10,w/2,h/2,150);
+    grad.addColorStop(0,'rgba(255,120,60,0.35)');
+    grad.addColorStop(1,'rgba(255,120,60,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,w,h);
+
+    for(const n of nodes){
+      n.x += n.vx; n.y += n.vy;
+      if(n.x<w/2-260||n.x>w/2+260) n.vx*=-1;
+      if(n.y<h/2-180||n.y>h/2+180) n.vy*=-1;
+    }
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i], b=nodes[j];
+        const d = Math.hypot(a.x-b.x, a.y-b.y);
+        if(d<70){
+          ctx.strokeStyle = 'rgba(120,210,255,'+(0.18*(1-d/70))+')';
+          ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke();
+        }
+      }
+    }
+    for(const n of nodes){
+      ctx.beginPath();
+      ctx.fillStyle = 'rgba('+n.hue+',0.9)';
+      ctx.arc(n.x,n.y,n.r,0,Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ---- Demo player canvas (subtle neural bg) ----
+(function(){
+  const canvas = document.getElementById('demoCanvas');
+  const ctx = canvas.getContext('2d');
+  function resize(){
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  const pts = [];
+  for(let i=0;i<50;i++){
+    pts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3});
+  }
+  function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(const p of pts){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>canvas.width)p.vx*=-1;
+      if(p.y<0||p.y>canvas.height)p.vy*=-1;
+    }
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j];
+      const d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d<90){
+        ctx.strokeStyle='rgba(80,200,255,'+(0.12*(1-d/90))+')';
+        ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+      }
+    }
+    for(const p of pts){
+      ctx.beginPath();ctx.fillStyle='rgba(100,220,255,0.7)';ctx.arc(p.x,p.y,1.4,0,Math.PI*2);ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// Play button toggles progress fill on demo player (illustrative, not a real video)
+let demoPlaying = false, demoTimer;
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  demoPlaying = !demoPlaying;
+  const btn = document.getElementById('playBtn');
+  const fill = document.getElementById('playerFill');
+  if(demoPlaying){
+    btn.innerHTML = '&#10074;&#10074;';
+    let pct = 32;
+    demoTimer = setInterval(()=>{
+      pct += 1.2;
+      if(pct>=100){ pct=0; }
+      fill.style.width = pct+'%';
+    }, 250);
+  } else {
+    btn.innerHTML = '&#9654;&#65039;';
+    clearInterval(demoTimer);
+  }
+});
+
+// ---- Get Started / Translate modal flow ----
+const overlay = document.getElementById('modalOverlay');
+const formStep = document.getElementById('formStep');
+const processStep = document.getElementById('processStep');
+const resultStep = document.getElementById('resultStep');
+
+function openModal(){
+  overlay.classList.add('open');
+  formStep.style.display='block';
+  processStep.style.display='none';
+  resultStep.style.display='none';
+}
+function closeModal(){
+  overlay.classList.remove('open');
+}
+document.getElementById('getStartedBtn').addEventListener('click', openModal);
+document.getElementById('tryFreeBtn').addEventListener('click', openModal);
+document.getElementById('startTranslatingBtn').addEventListener('click', openModal);
+document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeModal(); });
+
+document.getElementById('watchDemoBtn').addEventListener('click', ()=>{
+  document.getElementById('demo').scrollIntoView({behavior:'smooth'});
+});
+
+document.getElementById('swapBtn').addEventListener('click', ()=>{
+  const f = document.getElementById('fromLang');
+  const t = document.getElementById('toLang');
+  const fv = f.value, tv = t.value;
+  if (fv === 'Auto-detect') return;   // "To" ro'yxatida Auto-detect yo'q
+  f.value = tv; t.value = fv;         // oldin indeks bo'yicha almashardi va hech narsa o'zgarmasdi
+});
+
+document.getElementById('translateAnotherBtn').addEventListener('click', ()=>{
+  formStep.style.display='block';
+  processStep.style.display='none';
+  resultStep.style.display='none';
+  document.getElementById('videoFileInput').value = '';
+  const _u=document.getElementById('videoUrlInput'); if(_u) _u.value='';
+  document.getElementById('fileNameHint').textContent = '';
+});
+
+const LANG_CODES = {'Auto-detect':'auto',English:'en',Uzbek:'uz',Turkish:'tr',Russian:'ru',Chinese:'zh',Japanese:'ja',Korean:'ko'};
+
+// Maqsad tilga mos ovozlar: uz → VoiceLab, qolganlari → ElevenLabs (backend hal qiladi)
+async function loadVoices(){
+  const sel = document.getElementById('voiceSelect');
+  const code = LANG_CODES[document.getElementById('toLang').value] || 'uz';
+  try{
+    const r = await fetch('/api/voices?language=' + encodeURIComponent(code));
+    if(!r.ok) return;
+    const voices = await r.json();
+    const keys = Object.keys(voices);
+    if(!keys.length) return;
+    sel.innerHTML = '';
+    keys.forEach(k=>{
+      const v = voices[k];
+      const o = document.createElement('option');
+      o.value = k;
+      o.textContent = v.name + (v.gender ? ' (' + v.gender + ')' : '');
+      sel.appendChild(o);
+    });
+  }catch(_){ /* server javob bermasa — "Auto" qoladi, backend standart ovozni tanlaydi */ }
+}
+document.getElementById('toLang').addEventListener('change', loadVoices);
+document.getElementById('swapBtn').addEventListener('click', ()=>setTimeout(loadVoices, 0));
+loadVoices();
+let lastResultBlobUrl = null;
+
+document.getElementById('videoFileInput').addEventListener('change', (e)=>{
+  const f = e.target.files[0];
+  const hint = document.getElementById('fileNameHint');
+  hint.style.color = 'var(--ink-soft)';
+  hint.textContent = f ? (f.name + ' · ' + (f.size/1024/1024).toFixed(1) + ' MB') : '';
+  document.getElementById('videoFileInput').style.borderColor = 'var(--line)';
+});
+
+document.getElementById('startTranslateBtn').addEventListener('click', async ()=>{
+  const fileInput = document.getElementById('videoFileInput');
+  const urlInput = document.getElementById('videoUrlInput');
+  const file = fileInput.files[0];
+  const videoUrl = (urlInput.value || '').trim();
+  const hint = document.getElementById('fileNameHint');
+
+  if(!file && !videoUrl){
+    fileInput.style.borderColor = '#ff5f6d';
+    hint.textContent = 'Fayl yuklang yoki YouTube/TikTok URL kiriting';
+    hint.style.color = '#ff5f6d';
+    return;
+  }
+  if(file && videoUrl){
+    hint.textContent = 'Faqat bittasini tanlang: fayl YOKI URL';
+    hint.style.color = '#ff5f6d';
+    return;
+  }
+
+  const from = document.getElementById('fromLang').value;
+  const to = document.getElementById('toLang').value;
+  const toCode = LANG_CODES[to] || 'uz';
+  const fromCode = LANG_CODES[from] || 'auto';
+
+  if(fromCode === toCode){
+    hint.textContent = 'Manba va maqsad tillar bir xil. Boshqa til tanlang.';
+    hint.style.color = '#ff5f6d';
+    return;
+  }
+
+  formStep.style.display='none';
+  processStep.style.display='block';
+  document.getElementById('processSub').textContent = from + ' → ' + to + ' · hang tight, this can take a few minutes';
+
+  const items = document.querySelectorAll('#processList .process-item');
+  items.forEach(it=>it.classList.remove('active','done'));
+  const fill = document.getElementById('modalFill');
+  const pct = document.getElementById('progressPct');
+  items[0].classList.add('active');
+  fill.style.width = '0%';
+  pct.textContent = '0%';
+
+  const stepToUi = {
+    download: 0,
+    extract_audio: 0,
+    transcribe: 1,
+    translate: 2,
+    tts_dub: 3,
+    mux: 4,
+    subtitles: 4
+  };
+
+  let pollTimer = null;
+  let ws = null;
+  const stopAll = () => {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    if (ws) { try { ws.close(); } catch(_){} ws = null; }
+  };
+
+  const applyProgress = (data) => {
+    const p = Math.max(0, Math.min(100, data.progress || 0));
+    fill.style.width = p + '%';
+    pct.textContent = Math.floor(p) + '%';
+    const uiIdx = stepToUi[data.step] != null ? stepToUi[data.step] : 0;
+    items.forEach((it, i) => {
+      it.classList.remove('active','done');
+      if (i < uiIdx) it.classList.add('done');
+      else if (i === uiIdx) it.classList.add(data.status === 'done' ? 'done' : 'active');
+    });
+    if (data.message) document.getElementById('processSub').textContent = data.message;
+  };
+
+  const finishSuccess = async (jobId) => {
+    items.forEach(it => { it.classList.remove('active'); it.classList.add('done'); });
+    fill.style.width = '100%';
+    pct.textContent = '100%';
+    const dl = await fetch('/api/jobs/' + jobId + '/download');
+    if (!dl.ok) {
+      const err = await dl.json().catch(() => ({ detail: 'Yuklab olishda xato' }));
+      throw new Error(err.detail || ('Download ' + dl.status));
+    }
+    const blob = await dl.blob();
+    if (lastResultBlobUrl) URL.revokeObjectURL(lastResultBlobUrl);
+    lastResultBlobUrl = URL.createObjectURL(blob);
+    setTimeout(() => {
+      processStep.style.display = 'none';
+      resultStep.style.display = 'block';
+      document.getElementById('resultTitle').textContent = 'translated_' + toCode + '.mp4';
+      document.getElementById('resultSub').textContent = 'Ready to download';
+    }, 300);
+  };
+
+  const watchJob = (jobId) => new Promise((resolve, reject) => {
+    let settled = false;
+    const done = (fn, arg) => {
+      if (settled) return;
+      settled = true;
+      stopAll();
+      fn(arg);
+    };
+
+    // WebSocket (asosiy)
+    try {
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(proto + '://' + location.host + '/ws/jobs/' + jobId);
+      ws.onmessage = async (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          if (data.error && data.status === 'error' && !data.job_id) {
+            done(reject, new Error(data.error));
+            return;
+          }
+          applyProgress(data);
+          if (data.status === 'done') {
+            try {
+              await finishSuccess(jobId);
+              done(resolve);
+            } catch (e) { done(reject, e); }
+          } else if (data.status === 'error') {
+            done(reject, new Error(data.error || data.message || 'Pipeline xatosi'));
+          }
+        } catch (e) { /* ignore parse */ }
+      };
+      ws.onerror = () => { /* polling fallback ishlaydi */ };
+    } catch (_) {}
+
+    // Polling fallback
+    const tick = async () => {
+      try {
+        const r = await fetch('/api/jobs/' + jobId);
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({ detail: 'Status olishda xato' }));
+          throw new Error(err.detail || ('Status ' + r.status));
+        }
+        const data = await r.json();
+        applyProgress(data);
+        if (data.status === 'done') {
+          await finishSuccess(jobId);
+          done(resolve);
+        } else if (data.status === 'error') {
+          done(reject, new Error(data.error || data.message || 'Pipeline xatosi'));
+        }
+      } catch (e) {
+        // WS ishlayotgan bo'lsa polling xatosini e'tiborsiz qoldiramiz
+        if (!ws || ws.readyState > 1) done(reject, e);
+      }
+    };
+    pollTimer = setInterval(tick, 2000);
+    tick();
+  });
+
+  try {
+    const formData = new FormData();
+    if (file) formData.append('video', file);
+    if (videoUrl) formData.append('video_url', videoUrl);
+    formData.append('target_language', toCode);
+    formData.append('source_language', fromCode);
+    formData.append('burn_subtitles', document.getElementById('burnSubtitlesCheckbox').checked);
+    formData.append('model_size', document.getElementById('modelSizeSelect').value);
+    formData.append('voice', document.getElementById('voiceSelect').value);
+
+    const res = await fetch('/api/translate', { method: 'POST', body: formData });
+    if (!res.ok) {
+      let msg = 'Server error ' + res.status;
+      try {
+        const err = await res.json();
+        if (typeof err.detail === 'string') msg = err.detail;
+        else if (Array.isArray(err.detail)) msg = err.detail.map(d => d.msg || JSON.stringify(d)).join('; ');
+        else if (err.detail) msg = JSON.stringify(err.detail);
+      } catch(_) {}
+      throw new Error(msg);
+    }
+
+    const job = await res.json();
+    const jobId = job.job_id;
+    if (!jobId) throw new Error('Job ID qaytmadi');
+    applyProgress(job);
+    await watchJob(jobId);
+
+  } catch (e) {
+    stopAll();
+    processStep.style.display = 'none';
+    formStep.style.display = 'block';
+    hint.textContent = 'Failed: ' + (e.message || e);
+    hint.style.color = '#ff5f6d';
+  }
+});
+
+document.getElementById('downloadBtn').addEventListener('click', ()=>{
+  if(!lastResultBlobUrl) return;
+  const title = document.getElementById('resultTitle').textContent;
+  const link = document.createElement('a');
+  link.href = lastResultBlobUrl;
+  link.download = title;
+  link.click();
+});
+
+document.getElementById('signInLink').addEventListener('click', (e)=>{
+  e.preventDefault();
+  openModal();
+});
+</script>
+</body>
+</html>
